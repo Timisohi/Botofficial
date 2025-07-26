@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bot Trader Official</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #fff;
+      text-align: center;
+    }
+    header {
+      padding: 2rem 1rem;
+      background-color: #111;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    .logo {
+      width: 80px;
+      border-radius: 50%;
+      margin: 1rem auto;
+    }
+    .container {
+      max-width: 700px;
+      margin: 2rem auto;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    select, button {
+      width: 90%;
+      padding: 1rem;
+      font-size: 1rem;
+      margin: 1rem 0;
+      border-radius: 10px;
+      border: none;
+      background-color: #333;
+      color: white;
+    }
+    .signal-box {
+      background-color: #1e1e1e;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-top: 1rem;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    canvas {
+      margin-top: 2rem;
+      background: #121212;
+      border-radius: 10px;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/5/55/Logo_TV_2015.png" alt="Bot Trader Logo" class="logo"/>
+    <h1>Bot Trader Official</h1>
+  </header>
+  <div class="container">
+    <select id="marketSelector">
+      <option>USD/BRL (OTC)</option>
+      <option>USD/PKR (OTC)</option>
+      <option>USD/INR (OTC)</option>
+      <option>USD/JPY (OTC)</option>
+      <option>AUD/JPY (OTC)</option>
+      <option>EUR/USD (OTC)</option>
+      <option>USD/ARS (OTC)</option>
+      <option>USD/DZD (OTC)</option>
+      <option>USD/COP (OTC)</option>
+      <option>CAD/CHF (OTC)</option>
+      <option>USD/BDT (OTC)</option>
+      <option>USD/PHP (JPY)</option>
+    </select>
+    <button onclick="getSignal()">Get Signal</button>
+    <div class="signal-box" id="signalBox">
+      <p>Choose a market to receive a technical signal.</p>
+    </div>
+    <canvas id="chart" width="600" height="300"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const chartCtx = document.getElementById('chart').getContext('2d');
+    const signalBox = document.getElementById('signalBox');
+    let chart;
+
+    function generateMockData() {
+      const data = [];
+      let value = 100;
+      for (let i = 0; i < 50; i++) {
+        value += (Math.random() - 0.5) * 2;
+        data.push(parseFloat(value.toFixed(2)));
+      }
+      return data;
+    }
+
+    function getSignal() {
+      const market = document.getElementById('marketSelector').value;
+      const prices = generateMockData();
+      const last = prices[prices.length - 1];
+      const mean = prices.reduce((a,b) => a + b, 0) / prices.length;
+      const signal = last > mean ? 'Buy' : 'Sell';
+      const strength = Math.abs(last - mean) > 1 ? 'Strong' : 'Moderate';
+
+      signalBox.innerHTML = `<h3>${market}</h3><p>Signal: <strong>${signal}</strong></p><p>Strength: <strong>${strength}</strong></p>`;
+
+      if (chart) chart.destroy();
+      chart = new Chart(chartCtx, {
+        type: 'line',
+        data: {
+          labels: Array.from({length: prices.length}, (_, i) => i),
+          datasets: [{
+            label: `${market} Price Trend`,
+            data: prices,
+            borderColor: signal === 'Buy' ? 'lime' : 'red',
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderWidth: 2,
+            tension: 0.3,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { labels: { color: '#fff' } }
+          },
+          scales: {
+            x: { ticks: { color: '#aaa' } },
+            y: { ticks: { color: '#aaa' } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
